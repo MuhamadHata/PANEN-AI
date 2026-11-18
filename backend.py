@@ -404,7 +404,33 @@ def load_and_preprocess_data():
     bulanan_konsumen["provinsi"] = bulanan_konsumen["provinsi"].str.title()
     bulanan_konsumen["komoditas"] = bulanan_konsumen["komoditas"].str.title()
 
-    # PRODUSEN BULANAN
+    # PRODUSEN BULANAN (banyak baris terbungkus tanda kutip ganda seperti Harga_Konsumen_Bulanan.csv)
+    with open("Dataset/prediksi/Harga_Produsen_Bulanan.csv", encoding="utf-8-sig") as f:
+        prod_lines = f.readlines()
+
+    KOLOM_PROD = ["Kode Provinsi", "Nama Provinsi", "Komoditas",
+                  "Tahun", "Bulan", "Harga (Rp)"]
+
+    prod_rows = []
+    for line in prod_lines[1:]:
+        raw = line.strip().strip('"')
+        if not raw:
+            continue
+        match = re.search(r'"?"?(Rp[\d,\.]+)"?"?\s*$', raw)
+        if match:
+            harga_p = match.group(1)
+            sisa_p  = raw[:match.start()].strip().strip('"').rstrip(",")
+        else:
+            harga_p = ""
+            sisa_p  = raw.strip().strip('"').rstrip(",")
+        parts_p = sisa_p.split(",")
+        if len(parts_p) >= 5:
+            prod_rows.append([parts_p[0].strip(), parts_p[1].strip(), parts_p[2].strip(),
+                              parts_p[3].strip(), parts_p[4].strip(), harga_p])
+
+    bulanan_produsen = pd.DataFrame(prod_rows, columns=KOLOM_PROD)
+    bulanan_produsen["Kode Provinsi"] = pd.to_numeric(bulanan_produsen["Kode Provinsi"], errors="coerce")
+
     bulanan_produsen.rename(columns={
         'Kode Provinsi': 'kode_wilayah',
         'Nama Provinsi': 'provinsi',

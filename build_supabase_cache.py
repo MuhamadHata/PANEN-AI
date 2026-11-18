@@ -298,15 +298,26 @@ def main():
         sync_fsva_with_supabase()
 
     print("=== [2/7] Memuat & memproses dataset terbaru ===")
+    df_cached = backend.df
     df_new, kom_map, prov_map = backend.load_and_preprocess_data()
-    backend.df = df_new
-    backend.komoditas_map = kom_map
-    backend.provinsi_map = prov_map
-    backend.komoditas_list = list(kom_map.values())
-    backend.provinsi_list = list(prov_map.values())
-    backend.komoditas_name2code = {v: k for k, v in kom_map.items()}
-    backend.provinsi_name2code = {v: k for k, v in prov_map.items()}
-    print(f"Dataset dimuat: {len(backend.df)} baris, {len(backend.provinsi_list)} provinsi, {len(backend.komoditas_list)} komoditas")
+    if len(df_new) == 0 or (df_cached is not None and len(df_cached) > 0 and len(df_new) < len(df_cached) * 0.5):
+        print(
+            f"[WARN] load_and_preprocess_data() hanya menghasilkan {len(df_new)} baris "
+            f"(cache parquet punya {len(df_cached) if df_cached is not None else 0} baris). "
+            f"Menggunakan df_cache.parquet sebagai fallback."
+        )
+    else:
+        backend.df = df_new
+        backend.komoditas_map = kom_map
+        backend.provinsi_map = prov_map
+        backend.komoditas_list = list(kom_map.values())
+        backend.provinsi_list = list(prov_map.values())
+        backend.komoditas_name2code = {v: k for k, v in kom_map.items()}
+        backend.provinsi_name2code = {v: k for k, v in prov_map.items()}
+    print(f"Dataset aktif: {len(backend.df)} baris, {len(backend.provinsi_list)} provinsi, {len(backend.komoditas_list)} komoditas")
+    if len(backend.df) == 0:
+        print("ERROR: Dataset kosong (0 baris), membatalkan upload cache agar tidak menimpa data!")
+        sys.exit(1)
 
     print("=== [3/7] Menghitung predict_all (heatmap 28 hari) ===")
     predict_all = {}
@@ -317,6 +328,9 @@ def main():
     print("=== [4/7] Menghitung predict_week (1-90 hari) & data historis ===")
     predict_week_90, latest_data = compute_predict_week_90_and_latest()
     print(f"  - {len(predict_week_90)} kombinasi provinsi x komoditas selesai")
+    if len(predict_week_90) == 0:
+        print("ERROR: predict_week_90 kosong, membatalkan upload!")
+        sys.exit(1)
 
     print("=== [5/7] Menghitung EWS horizon & DVI ===")
     backend._ews_cache = {}
