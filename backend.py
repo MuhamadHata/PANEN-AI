@@ -75,7 +75,10 @@ def get_supabase():
     return bool(SUPABASE_URL and SUPABASE_KEY)
 
 def _supabase_headers(content_type=None):
-    h = {'Authorization': f'Bearer {SUPABASE_KEY}', 'apikey': SUPABASE_KEY}
+    h = {'apikey': SUPABASE_KEY}
+    # Key baru Supabase (sb_secret_...) bukan JWT — hanya legacy key (eyJ...) yang pakai Bearer
+    if not SUPABASE_KEY.startswith('sb_'):
+        h['Authorization'] = f'Bearer {SUPABASE_KEY}'
     if content_type:
         h['Content-Type'] = content_type
     return h

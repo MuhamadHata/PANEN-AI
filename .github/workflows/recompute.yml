@@ -1,0 +1,48 @@
+name: Recompute PANEN-AI Cache
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Alasan recompute (mis. manual / admin_upload)"
+        required: false
+        default: "manual"
+  push:
+    branches:
+      - main
+    paths:
+      - "Dataset/**"
+      - "xgboost_model.pkl"
+      - "build_supabase_cache.py"
+      - "backend.py"
+      - ".github/workflows/recompute.yml"
+
+concurrency:
+  group: recompute-panen-ai-cache
+  cancel-in-progress: false
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements.txt"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Hitung ulang cache ML & upload ke Supabase Storage
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_BUCKET: ${{ secrets.SUPABASE_BUCKET }}
+        run: python build_supabase_cache.py
