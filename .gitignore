@@ -1,0 +1,29 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Cache files
+predict_all_cache.json
+ews_cache.json
+fsva_nowcast_cache.json
+
+# Model & data (kalau terlalu besar upload manual ke Render)
+# df_cache.parquet
+# xgboost_model.pkl
+
+# Cloudflare Workers build
+cf-public/
+.wrangler/
+
+# OS
+.DS_Store
+Thumbs.db
