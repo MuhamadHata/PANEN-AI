@@ -531,6 +531,164 @@ input[type=range]::-webkit-slider-thumb {
   gap: 10px;
 }
 .loading-placeholder i { font-size: 22px; }
+
+/* Weight / kg selector in sidebar */
+.weight-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.weight-input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+.weight-input:focus { outline: none; border-color: var(--green-500); }
+.weight-unit {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green-400);
+  white-space: nowrap;
+}
+.weight-pills {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+}
+.weight-pill {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+.weight-pill:hover { border-color: var(--green-400); color: var(--green-400); }
+.weight-pill.active { background: var(--green-600); border-color: var(--green-600); color: #fff; }
+.unit-note {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.42);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* ── PERBANDINGAN 3 BULAN (Bulan Lalu / Saat Ini / Depan) ── */
+.month-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+@media (max-width: 980px) {
+  .month-cards { grid-template-columns: 1fr; }
+}
+.month-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 15px 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.month-card.current {
+  border-color: var(--green-500);
+  background: linear-gradient(180deg, #f6fef9 0%, #ffffff 100%);
+}
+.month-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.month-kicker {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--muted);
+}
+.month-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.month-card.current .month-tag {
+  background: var(--green-50);
+  color: var(--green-700);
+  border-color: var(--green-100);
+}
+.month-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.month-price {
+  font-family: var(--mono);
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  margin-top: 2px;
+}
+.month-price small {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.month-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+.diff-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  margin-top: 3px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.diff-up   { background: #fee2e2; color: #b91c1c; }
+.diff-down { background: #dcfce7; color: #166534; }
+.diff-flat { background: #f1f5f9; color: #475569; }
+
+.diff-summary-box {
+  margin-top: 12px;
+  padding: 11px 15px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--ink);
+  line-height: 1.55;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.diff-summary-box i {
+  color: var(--green-600);
+  margin-top: 3px;
+  flex-shrink: 0;
+}
 </style>
 </head>
 <body>
@@ -553,10 +711,25 @@ input[type=range]::-webkit-slider-thumb {
     </div>
 
     <div class="form-group">
-      <label>Komoditas</label>
+      <label>Komoditas <span style="color:var(--green-400);font-weight:600;text-transform:none;">(per 1 kg)</span></label>
       <select id="selKomoditas">
         <option value="">Memuat...</option>
       </select>
+    </div>
+
+    <div class="form-group">
+      <label>Estimasi Berat</label>
+      <div class="weight-box">
+        <input type="number" id="inputBerat" class="weight-input" min="0.5" max="10000" step="0.5" value="1">
+        <span class="weight-unit">kg</span>
+      </div>
+      <div class="weight-pills" id="weightPills">
+        <button type="button" class="weight-pill active" onclick="setWeight(1, this)">1 kg</button>
+        <button type="button" class="weight-pill" onclick="setWeight(5, this)">5 kg</button>
+        <button type="button" class="weight-pill" onclick="setWeight(10, this)">10 kg</button>
+        <button type="button" class="weight-pill" onclick="setWeight(50, this)">50 kg</button>
+      </div>
+      <div class="unit-note">Harga dasar seluruh komoditas (Cabai, Ayam, Sapi, Telur) adalah <strong>per 1 kg</strong>.</div>
     </div>
 
     <div class="form-group">
@@ -603,22 +776,31 @@ input[type=range]::-webkit-slider-thumb {
   <div class="page-header">
     <div>
       <h2>Prediksi Harga Pangan</h2>
-      <p>Proyeksi harga mulai Januari 2026</p>
+      <p id="pageSubtitle">Perbandingan &amp; proyeksi harga bulanan · Satuan dasar: per 1 kg</p>
     </div>
-  
+    <div class="header-badge" id="unitBadge">
+      <i class="fa fa-scale-balanced"></i>
+      <span>Satuan Dasar: Rp / 1 kg</span>
+    </div>
   </div>
 
   <!-- Status banner -->
   <div id="statusBanner"></div>
+
+  <!-- ── PERBANDINGAN 3 BULAN: BULAN LALU · BULAN SAAT INI · BULAN DEPAN ── -->
+  <div id="monthlyComparisonWrap" style="display:none;">
+    <div class="month-cards" id="monthCards"></div>
+    <div class="diff-summary-box" id="diffSummaryBox"></div>
+  </div>
 
   <!-- ── GRAFIK PREDIKSI ── -->
   <div class="panel">
     <div class="panel-hd">
       <div class="panel-title">
         <i class="fa fa-chart-line"></i>
-        Grafik Prediksi Harga
+        <span id="grafikTitle">Grafik Prediksi Harga</span>
       </div>
-
+      <span class="panel-sub" id="grafikSub">Satuan: Rp / 1 kg</span>
     </div>
     <div class="chart-wrap">
       <canvas id="chartPrediksi"></canvas>
@@ -639,7 +821,7 @@ input[type=range]::-webkit-slider-thumb {
           <i class="fa fa-table-cells"></i>
           Heatmap Risiko Kenaikan Harga
         </div>
-  
+        <span class="panel-sub">Harga konsumen per 1 kg · 4 minggu ke depan</span>
       </div>
 
       <div id="heatmapContent">
@@ -706,13 +888,82 @@ let chartInstance = null;
 let allHeatmapData = null;
 let topNValue = 10;
 let topNSmValue = 10;
+let currentWeightKg = 1;
+let lastGrafikState = null;
+
+const BULAN_ID = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+const BULAN_SHORT = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+];
+
+function getThreeMonthsInfo() {
+  const now = new Date();
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const curr = new Date(now.getFullYear(), now.getMonth(), 1);
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return {
+    now,
+    prevLabel: `${BULAN_ID[prev.getMonth()]} ${prev.getFullYear()}`,
+    currLabel: `${BULAN_ID[curr.getMonth()]} ${curr.getFullYear()}`,
+    nextLabel: `${BULAN_ID[next.getMonth()]} ${next.getFullYear()}`,
+  };
+}
+
+function fmtRp(val) {
+  return 'Rp ' + Math.round(Number(val) || 0).toLocaleString('id-ID');
+}
+
+function fmtKg(kg) {
+  return Number.isInteger(kg) ? `${kg} kg` : `${kg.toLocaleString('id-ID')} kg`;
+}
+
+function updateHeaderPeriod(lastDataDate) {
+  const m = getThreeMonthsInfo();
+  const basis = lastDataDate ? ` · Basis historis s/d ${lastDataDate}` : '';
+  document.getElementById('pageSubtitle').textContent =
+    `Perbandingan & proyeksi ${m.prevLabel} – ${m.nextLabel} · Satuan dasar: per 1 kg${basis}`;
+  const badge = document.getElementById('unitBadge');
+  if (badge) {
+    badge.innerHTML = currentWeightKg === 1
+      ? '<i class="fa fa-scale-balanced"></i><span>Satuan Komoditas: per 1 kg</span>'
+      : `<i class="fa fa-scale-balanced"></i><span>Estimasi ${fmtKg(currentWeightKg)} (Dasar per 1 kg)</span>`;
+  }
+}
+
+function setWeight(kg, el) {
+  currentWeightKg = Math.max(0.5, Number(kg) || 1);
+  const inp = document.getElementById('inputBerat');
+  if (inp) inp.value = currentWeightKg;
+  document.querySelectorAll('.weight-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  updateHeaderPeriod(lastGrafikState ? lastGrafikState.lastDataDate : null);
+  if (lastGrafikState) renderAllPredictionViews();
+}
+
+document.getElementById('inputBerat').addEventListener('input', function() {
+  const val = parseFloat(this.value);
+  if (!val || val <= 0) return;
+  currentWeightKg = val;
+  document.querySelectorAll('.weight-pill').forEach(p => {
+    const pillVal = parseFloat(p.textContent);
+    p.classList.toggle('active', pillVal === val);
+  });
+  updateHeaderPeriod(lastGrafikState ? lastGrafikState.lastDataDate : null);
+  if (lastGrafikState) renderAllPredictionViews();
+});
+
+updateHeaderPeriod(null);
 
 /* ═══════════════════════════════════════
    INIT: LOAD MODEL INFO
 ═══════════════════════════════════════ */
 async function init() {
   try {
-    const res  = await fetch(`${API}/api/model-info`, { signal: AbortSignal.timeout(5000) });
+    const res  = await fetch(`${API}/api/model-info`, { signal: AbortSignal.timeout(10000) });
     if (!res.ok) throw new Error('Backend tidak merespons');
     const info = await res.json();
 
@@ -724,15 +975,13 @@ async function init() {
     selProv.innerHTML = provList.map(p => `<option value="${p}">${p}</option>`).join('');
 
     const selKomo = document.getElementById('selKomoditas');
-    selKomo.innerHTML = komList.map(k => `<option value="${k}">${k}</option>`).join('');
+    selKomo.innerHTML = komList.map(k => `<option value="${k}">${k} (per 1 kg)</option>`).join('');
 
     const selKomoHeatmap = document.getElementById('selKomoditasHeatmap');
-    selKomoHeatmap.innerHTML = komList.map(k => `<option value="${k}">${k}</option>`).join('');
-
-
+    selKomoHeatmap.innerHTML = komList.map(k => `<option value="${k}">${k} (per 1 kg)</option>`).join('');
 
   } catch(e) {
-    showBanner(`Backend tidak terhubung: ${e.message}. Pastikan backend.py sudah berjalan.`, 'error');
+    showBanner(`Backend tidak terhubung: ${e.message}.`, 'error');
   }
 }
 
@@ -783,7 +1032,7 @@ function setTopNSm(n, el) {
 }
 
 /* ═══════════════════════════════════════
-   GRAFIK PREDIKSI
+   GRAFIK PREDIKSI + PERBANDINGAN 3 BULAN
 ═══════════════════════════════════════ */
 async function loadGrafik() {
   const provinsi  = document.getElementById('selProvinsi').value;
@@ -804,28 +1053,45 @@ async function loadGrafik() {
   placeholder.style.display = 'none';
 
   try {
-    const res = await fetch(`${API}/api/predict-week`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provinsi, komoditas, horizon })
-    });
-    if (!res.ok) throw new Error('Gagal mengambil data prediksi');
-    const data = await res.json();
+    // Selalu ambil minimal 60 hari proyeksi agar Bulan Saat Ini (H+1..30) & Bulan Depan (H+31..60) terhitung penuh
+    const fetchHorizon = Math.max(horizon, 60);
+    const [predRes, latestRes] = await Promise.all([
+      fetch(`${API}/api/predict-week`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provinsi, komoditas, horizon: fetchHorizon })
+      }),
+      fetch(`${API}/api/get-latest-data?provinsi=${encodeURIComponent(provinsi)}&komoditas=${encodeURIComponent(komoditas)}&days=30`)
+    ]);
 
-    if (data.status !== 'success') throw new Error(data.message || 'Error dari backend');
+    if (!predRes.ok) throw new Error('Gagal mengambil data prediksi');
+    const predData = await predRes.json();
+    if (predData.status !== 'success') throw new Error(predData.message || 'Error dari backend');
 
-    const preds  = data.predictions;
-    const labels = preds.map(p => `H+${p.day}`);
-    const prices = preds.map(p => p.price);
+    let histPrices = [];
+    if (latestRes.ok) {
+      const latestData = await latestRes.json();
+      if (latestData.status === 'success' && latestData.data && Array.isArray(latestData.data.prices)) {
+        histPrices = latestData.data.prices.filter(v => typeof v === 'number' && !Number.isNaN(v));
+      }
+    }
 
-    renderGrafik(labels, prices, provinsi, komoditas);
+    lastGrafikState = {
+      provinsi,
+      komoditas,
+      horizon,
+      lastDataDate: predData.last_data_date || '',
+      allPredictions: predData.predictions || [],
+      histPrices,
+    };
 
-    const avg = prices.reduce((a,b)=>a+b,0)/prices.length;
-    const min = Math.min(...prices);
-    const max = Math.max(...prices);
+    updateHeaderPeriod(lastGrafikState.lastDataDate);
+    renderAllPredictionViews();
 
-
-    showBanner(`✅ Prediksi berhasil dimuat: ${horizon} hari ke depan untuk ${komoditas} di ${provinsi}`, 'success');
+    showBanner(
+      `✅ Prediksi dimuat: ${komoditas} (${fmtKg(currentWeightKg)}) di ${provinsi} — perbandingan 3 bulan & grafik ${horizon} hari`,
+      'success'
+    );
 
   } catch(e) {
     placeholder.style.display = 'flex';
@@ -836,7 +1102,148 @@ async function loadGrafik() {
   icon.className = 'fa fa-chart-line';
 }
 
-function renderGrafik(labels, prices, provinsi, komoditas) {
+function avgArr(arr) {
+  if (!arr.length) return 0;
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function buildDiffPill(diffRp, diffPct, refLabel) {
+  if (Math.abs(diffPct) < 1.0) {
+    const sign = diffPct >= 0 ? '+' : '';
+    return `<span class="diff-pill diff-flat"><i class="fa fa-minus"></i> Stabil / Hampir Sama (${sign}${diffPct.toFixed(2)}% vs ${refLabel})</span>`;
+  }
+  if (diffPct > 0) {
+    return `<span class="diff-pill diff-up"><i class="fa fa-arrow-trend-up"></i> Naik +${fmtRp(Math.abs(diffRp))} (+${diffPct.toFixed(1)}% vs ${refLabel})</span>`;
+  }
+  return `<span class="diff-pill diff-down"><i class="fa fa-arrow-trend-down"></i> Turun -${fmtRp(Math.abs(diffRp))} (${diffPct.toFixed(1)}% vs ${refLabel})</span>`;
+}
+
+function renderAllPredictionViews() {
+  if (!lastGrafikState) return;
+  const { provinsi, komoditas, horizon, allPredictions, histPrices } = lastGrafikState;
+  const w = currentWeightKg;
+  const m = getThreeMonthsInfo();
+  const unitLabel = w === 1 ? '1 kg' : fmtKg(w);
+
+  // Hitung rata-rata per kg untuk 3 periode:
+  // Bulan Lalu = rata-rata 30 hari historis terakhir
+  // Bulan Saat Ini = rata-rata proyeksi H+1..H+30
+  // Bulan Depan = rata-rata proyeksi H+31..H+60
+  const curSlice  = allPredictions.slice(0, 30).map(p => p.price);
+  const nextSlice = allPredictions.slice(30, 60).map(p => p.price);
+
+  const prevAvgKg = histPrices.length ? avgArr(histPrices) : (curSlice[0] || 0);
+  const currAvgKg = avgArr(curSlice);
+  const nextAvgKg = nextSlice.length ? avgArr(nextSlice) : currAvgKg;
+
+  const prevVal = prevAvgKg * w;
+  const currVal = currAvgKg * w;
+  const nextVal = nextAvgKg * w;
+
+  const diffCurrRp  = currVal - prevVal;
+  const diffCurrPct = prevAvgKg ? ((currAvgKg - prevAvgKg) / prevAvgKg) * 100 : 0;
+
+  const diffNextRp  = nextVal - currVal;
+  const diffNextPct = currAvgKg ? ((nextAvgKg - currAvgKg) / currAvgKg) * 100 : 0;
+
+  const prevMin = (histPrices.length ? Math.min(...histPrices) : prevAvgKg) * w;
+  const prevMax = (histPrices.length ? Math.max(...histPrices) : prevAvgKg) * w;
+  const currMin = (curSlice.length ? Math.min(...curSlice) : currAvgKg) * w;
+  const currMax = (curSlice.length ? Math.max(...curSlice) : currAvgKg) * w;
+  const nextMin = (nextSlice.length ? Math.min(...nextSlice) : nextAvgKg) * w;
+  const nextMax = (nextSlice.length ? Math.max(...nextSlice) : nextAvgKg) * w;
+
+  const perKgNote = (avgKg) => w === 1
+    ? ''
+    : `<div class="month-sub" style="font-family:var(--mono);color:var(--green-700);font-weight:600;">Harga satuan: ${fmtRp(avgKg)} / 1 kg</div>`;
+
+  document.getElementById('monthCards').innerHTML = `
+    <div class="month-card">
+      <div class="month-card-top">
+        <span class="month-kicker">Bulan Lalu</span>
+        <span class="month-tag">Acuan Historis 30h</span>
+      </div>
+      <div class="month-name">${m.prevLabel}</div>
+      <div class="month-price">${fmtRp(prevVal)} <small>/ ${unitLabel}</small></div>
+      ${perKgNote(prevAvgKg)}
+      <div class="month-sub">Rentang: ${fmtRp(prevMin)} – ${fmtRp(prevMax)}</div>
+      <span class="diff-pill diff-flat"><i class="fa fa-clock-rotate-left"></i> Baseline Pembanding</span>
+    </div>
+
+    <div class="month-card current">
+      <div class="month-card-top">
+        <span class="month-kicker">Bulan Saat Ini</span>
+        <span class="month-tag">Proyeksi H+1 s/d H+30</span>
+      </div>
+      <div class="month-name">${m.currLabel}</div>
+      <div class="month-price">${fmtRp(currVal)} <small>/ ${unitLabel}</small></div>
+      ${perKgNote(currAvgKg)}
+      <div class="month-sub">Rentang: ${fmtRp(currMin)} – ${fmtRp(currMax)}</div>
+      ${buildDiffPill(diffCurrRp, diffCurrPct, 'Bulan Lalu')}
+    </div>
+
+    <div class="month-card">
+      <div class="month-card-top">
+        <span class="month-kicker">Bulan Depan</span>
+        <span class="month-tag">Proyeksi H+31 s/d H+60</span>
+      </div>
+      <div class="month-name">${m.nextLabel}</div>
+      <div class="month-price">${fmtRp(nextVal)} <small>/ ${unitLabel}</small></div>
+      ${perKgNote(nextAvgKg)}
+      <div class="month-sub">Rentang: ${fmtRp(nextMin)} – ${fmtRp(nextMax)}</div>
+      ${buildDiffPill(diffNextRp, diffNextPct, 'Bulan Ini')}
+    </div>
+  `;
+
+  // Kalimat kesimpulan lugas: apakah ada perbedaan atau tidak
+  const hasDiffCurr = Math.abs(diffCurrPct) >= 1.0;
+  const hasDiffNext = Math.abs(diffNextPct) >= 1.0;
+
+  const phraseCurr = !hasDiffCurr
+    ? `<strong>tidak ada perbedaan signifikan</strong> (${diffCurrPct >= 0 ? '+' : ''}${diffCurrPct.toFixed(2)}%) pada <strong>${m.currLabel}</strong> dibanding ${m.prevLabel}`
+    : (diffCurrPct > 0
+      ? `<strong>naik +${fmtRp(Math.abs(diffCurrRp))} (+${diffCurrPct.toFixed(1)}%)</strong> pada <strong>${m.currLabel}</strong> dibanding ${m.prevLabel}`
+      : `<strong>turun -${fmtRp(Math.abs(diffCurrRp))} (${diffCurrPct.toFixed(1)}%)</strong> pada <strong>${m.currLabel}</strong> dibanding ${m.prevLabel}`);
+
+  const phraseNext = !hasDiffNext
+    ? `kemudian <strong>cenderung stabil / tidak berubah signifikan</strong> (${diffNextPct >= 0 ? '+' : ''}${diffNextPct.toFixed(2)}%) di <strong>${m.nextLabel}</strong>.`
+    : (diffNextPct > 0
+      ? `lalu diproyeksikan <strong>kembali naik +${fmtRp(Math.abs(diffNextRp))} (+${diffNextPct.toFixed(1)}%)</strong> pada <strong>${m.nextLabel}</strong>.`
+      : `lalu diproyeksikan <strong>turun -${fmtRp(Math.abs(diffNextRp))} (${diffNextPct.toFixed(1)}%)</strong> pada <strong>${m.nextLabel}</strong>.`);
+
+  const headline = (hasDiffCurr || hasDiffNext)
+    ? '<strong>Ada perbedaan harga antar bulan:</strong>'
+    : '<strong>Tidak ada perbedaan signifikan antar bulan:</strong>';
+
+  document.getElementById('diffSummaryBox').innerHTML = `
+    <i class="fa fa-circle-info"></i>
+    <div>
+      ${headline} Untuk <strong>${komoditas} (${unitLabel})</strong> di <strong>${provinsi}</strong>, harga ${phraseCurr}, ${phraseNext}
+    </div>
+  `;
+  document.getElementById('monthlyComparisonWrap').style.display = 'block';
+
+  // Render grafik sesuai horizon pilihan user dengan tanggal riil mulai besok
+  const chartSlice = allPredictions.slice(0, horizon);
+  const startDate = new Date();
+  const labels = chartSlice.map(p => {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + p.day);
+    return `${d.getDate()} ${BULAN_SHORT[d.getMonth()]}`;
+  });
+  const prices = chartSlice.map(p => p.price * w);
+  const baselineSeries = chartSlice.map(() => prevVal);
+
+  document.getElementById('grafikTitle').textContent =
+    `Grafik Prediksi ${komoditas} — ${provinsi} (${horizon} Hari ke Depan)`;
+  document.getElementById('grafikSub').textContent =
+    w === 1 ? 'Satuan: Rp / 1 kg · Garis putus-putus = Rata-rata Bulan Lalu'
+            : `Estimasi ${fmtKg(w)} (Dasar per 1 kg) · Garis putus-putus = Rata-rata Bulan Lalu`;
+
+  renderGrafik(labels, prices, baselineSeries, provinsi, komoditas, unitLabel, w);
+}
+
+function renderGrafik(labels, prices, baselineSeries, provinsi, komoditas, unitLabel, weightKg) {
   const canvas = document.getElementById('chartPrediksi');
 
   if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
@@ -851,27 +1258,52 @@ function renderGrafik(labels, prices, provinsi, komoditas) {
     type: 'line',
     data: {
       labels,
-      datasets: [{
-        label: `${komoditas} — ${provinsi}`,
-        data: prices,
-        borderColor: '#16a34a',
-        backgroundColor: gradient,
-        borderWidth: 2,
-        pointRadius: labels.length <= 30 ? 3 : 0,
-        pointHoverRadius: 5,
-        pointBackgroundColor: '#16a34a',
-        tension: 0.4,
-        fill: true,
-      }]
+      datasets: [
+        {
+          label: `Proyeksi ${komoditas} (${unitLabel})`,
+          data: prices,
+          borderColor: '#16a34a',
+          backgroundColor: gradient,
+          borderWidth: 2,
+          pointRadius: labels.length <= 35 ? 3 : 0,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#16a34a',
+          tension: 0.35,
+          fill: true,
+        },
+        {
+          label: `Rata-rata Bulan Lalu (${unitLabel})`,
+          data: baselineSeries,
+          borderColor: '#94a3b8',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          fill: false,
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: false },
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            boxWidth: 14,
+            font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+            color: '#5a6e57',
+          }
+        },
         tooltip: {
           callbacks: {
-            label: ctx => `Rp ${ctx.parsed.y.toLocaleString('id-ID', {maximumFractionDigits:0})}`
+            label: ctx => {
+              const v = ctx.parsed.y;
+              const base = `${ctx.dataset.label}: ${fmtRp(v)}`;
+              return weightKg > 1 ? `${base} (${fmtRp(v / weightKg)}/kg)` : `${base}/kg`;
+            }
           }
         }
       },
@@ -980,7 +1412,8 @@ function renderHeatmap(data, komoditas) {
                 if (!mg) return `<td><span class="heat-cell heat-stabil">—</span></td>`;
                 const cls = 'heat-' + riskClass(mg.risk_level);
                 const sign = mg.pct_change > 0 ? '+' : '';
-                return `<td><span class="heat-cell ${cls}">${sign}${mg.pct_change.toFixed(1)}%</span></td>`;
+                const tip = mg.avg_price ? `${prov} · Minggu ${m}: ${fmtRp(mg.avg_price)} / 1 kg (${sign}${mg.pct_change.toFixed(1)}%)` : '';
+                return `<td><span class="heat-cell ${cls}" title="${tip}">${sign}${mg.pct_change.toFixed(1)}%</span></td>`;
               }).join('')}
             </tr>
           `).join('')}
